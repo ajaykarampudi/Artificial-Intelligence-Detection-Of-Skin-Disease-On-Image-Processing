@@ -438,13 +438,11 @@ export default function App() {
 
         <div className="w-full max-w-md bg-white border border-slate-200 shadow-2xl rounded-2xl p-8 space-y-6 relative z-10 animate-fade-in">
           <div className="text-center space-y-2">
-            <div className="inline-flex items-center justify-center p-3.5 bg-blue-50 rounded-2xl border border-blue-100 shadow-sm mb-2">
-              <img 
-                src="https://ik.imagekit.io/lz4kwvpha/Logo.jpeg" 
-                alt="Logo" 
-                className="w-12 h-12 object-cover rounded-xl shadow-md border border-slate-200"
-              />
-            </div>
+            <img 
+              src="https://ik.imagekit.io/lz4kwvpha/Logo.jpeg" 
+              alt="Logo" 
+              className="w-16 h-16 object-cover rounded-xl shadow-md border border-slate-200 mx-auto mb-2"
+            />
             <h2 className="text-xl md:text-2xl font-black text-slate-900 tracking-tight">DermAI Clinical Portal</h2>
             <p className="text-slate-500 text-xs">Access the artificial intelligence diagnostic suite</p>
           </div>
