@@ -431,69 +431,53 @@ export default function App() {
 
   if (!currentUser) {
     return (
-      <div className="min-h-screen bg-slate-900 flex flex-col justify-center items-center p-6 relative overflow-hidden font-sans">
+      <div className="min-h-screen bg-slate-50 flex flex-col justify-center items-center p-6 relative overflow-hidden font-sans">
         {/* Decorative background shapes */}
-        <div className="absolute top-[-20%] left-[-10%] w-[500px] h-[500px] rounded-full bg-blue-500/10 blur-[120px] pointer-events-none" />
-        <div className="absolute bottom-[-20%] right-[-10%] w-[500px] h-[500px] rounded-full bg-indigo-500/10 blur-[120px] pointer-events-none" />
+        <div className="absolute top-[-20%] left-[-10%] w-[500px] h-[500px] rounded-full bg-blue-500/5 blur-[120px] pointer-events-none" />
+        <div className="absolute bottom-[-20%] right-[-10%] w-[500px] h-[500px] rounded-full bg-indigo-500/5 blur-[120px] pointer-events-none" />
 
-        <div className="w-full max-w-md bg-slate-950/80 backdrop-blur-xl border border-slate-800 shadow-2xl rounded-2xl p-8 space-y-6 relative z-10 animate-fade-in">
+        <div className="w-full max-w-md bg-white border border-slate-200 shadow-2xl rounded-2xl p-8 space-y-6 relative z-10 animate-fade-in">
           <div className="text-center space-y-2">
-            <div className="inline-flex items-center justify-center p-3.5 bg-blue-500/10 rounded-2xl border border-blue-500/20 shadow-inner mb-2">
+            <div className="inline-flex items-center justify-center p-3.5 bg-blue-50 rounded-2xl border border-blue-100 shadow-sm mb-2">
               <img 
                 src="https://ik.imagekit.io/lz4kwvpha/Logo.jpeg" 
                 alt="Logo" 
-                className="w-12 h-12 object-cover rounded-xl shadow-md border border-slate-700/50"
+                className="w-12 h-12 object-cover rounded-xl shadow-md border border-slate-200"
               />
             </div>
-            <h2 className="text-xl md:text-2xl font-black text-white tracking-tight">DermAI Clinical Portal</h2>
-            <p className="text-slate-400 text-xs">Access the artificial intelligence diagnostic suite</p>
+            <h2 className="text-xl md:text-2xl font-black text-slate-900 tracking-tight">DermAI Clinical Portal</h2>
+            <p className="text-slate-500 text-xs">Access the artificial intelligence diagnostic suite</p>
           </div>
 
           <form onSubmit={handleLogin} className="space-y-4">
             <div className="space-y-1">
-              <label className="text-[10px] uppercase tracking-wider font-extrabold text-slate-400">Full Name</label>
+              <label className="text-[10px] uppercase tracking-wider font-extrabold text-slate-500">Full Name</label>
               <input
                 type="text"
                 required
                 value={loginName}
                 onChange={(e) => setLoginName(e.target.value)}
                 placeholder="e.g. John Doe"
-                className="w-full px-4 py-2.5 bg-slate-900 border border-slate-800 hover:border-slate-700 focus:border-blue-500 text-white rounded-xl text-xs transition-all outline-none"
+                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 hover:border-slate-300 focus:border-blue-500 focus:bg-white text-slate-800 rounded-xl text-xs transition-all outline-none"
               />
             </div>
 
             <div className="space-y-1">
-              <label className="text-[10px] uppercase tracking-wider font-extrabold text-slate-400">Email Address</label>
+              <label className="text-[10px] uppercase tracking-wider font-extrabold text-slate-500">Email Address</label>
               <input
                 type="email"
                 required
                 value={loginEmail}
                 onChange={(e) => setLoginEmail(e.target.value)}
                 placeholder="e.g. user@gmail.com, doctor@doctor.com"
-                className="w-full px-4 py-2.5 bg-slate-900 border border-slate-800 hover:border-slate-700 focus:border-blue-500 text-white rounded-xl text-xs transition-all outline-none"
+                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 hover:border-slate-300 focus:border-blue-500 focus:bg-white text-slate-800 rounded-xl text-xs transition-all outline-none"
               />
-              <div className="bg-slate-900/50 border border-slate-800/80 rounded-xl p-3 text-[10px] text-slate-400 leading-relaxed space-y-1 mt-1.5">
-                <span className="font-bold text-slate-300">ℹ️ Domain Roles Configuration:</span>
-                <div className="grid grid-cols-3 gap-2 mt-1">
-                  <div className="bg-slate-950 p-1.5 rounded border border-slate-850 text-center">
-                    <span className="font-bold text-slate-300">@gmail.com</span>
-                    <span className="block text-[8px] text-blue-400 uppercase mt-0.5">Patient</span>
-                  </div>
-                  <div className="bg-slate-950 p-1.5 rounded border border-slate-850 text-center">
-                    <span className="font-bold text-slate-300">@doctor.com</span>
-                    <span className="block text-[8px] text-emerald-400 uppercase mt-0.5">Doctor</span>
-                  </div>
-                  <div className="bg-slate-950 p-1.5 rounded border border-slate-850 text-center">
-                    <span className="font-bold text-slate-300">@admin.com</span>
-                    <span className="block text-[8px] text-purple-400 uppercase mt-0.5">Admin</span>
-                  </div>
-                </div>
-              </div>
+
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1">
-                <label className="text-[10px] uppercase tracking-wider font-extrabold text-slate-400">Age (Optional)</label>
+                <label className="text-[10px] uppercase tracking-wider font-extrabold text-slate-500">Age (Optional)</label>
                 <input
                   type="number"
                   min="1"
@@ -501,27 +485,27 @@ export default function App() {
                   value={loginAge}
                   onChange={(e) => setLoginAge(e.target.value)}
                   placeholder="e.g. 28"
-                  className="w-full px-4 py-2.5 bg-slate-900 border border-slate-800 hover:border-slate-700 focus:border-blue-500 text-white rounded-xl text-xs transition-all outline-none"
+                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 hover:border-slate-300 focus:border-blue-500 focus:bg-white text-slate-800 rounded-xl text-xs transition-all outline-none"
                 />
               </div>
 
               <div className="space-y-1">
-                <label className="text-[10px] uppercase tracking-wider font-extrabold text-slate-400">Gender (Optional)</label>
+                <label className="text-[10px] uppercase tracking-wider font-extrabold text-slate-500">Gender (Optional)</label>
                 <select
                   value={loginGender}
                   onChange={(e) => setLoginGender(e.target.value)}
-                  className="w-full px-4 py-2.5 bg-slate-900 border border-slate-800 hover:border-slate-700 focus:border-blue-500 text-white rounded-xl text-xs transition-all outline-none cursor-pointer"
+                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 hover:border-slate-300 focus:border-blue-500 focus:bg-white text-slate-800 rounded-xl text-xs transition-all outline-none cursor-pointer"
                 >
-                  <option value="" className="bg-slate-950">Select</option>
-                  <option value="Male" className="bg-slate-950">Male</option>
-                  <option value="Female" className="bg-slate-950">Female</option>
-                  <option value="Other" className="bg-slate-950">Other</option>
+                  <option value="">Select</option>
+                  <option value="Male">Male</option>
+                  <option value="Female">Female</option>
+                  <option value="Other">Other</option>
                 </select>
               </div>
             </div>
 
             {loginError && (
-              <div className="bg-rose-500/10 border border-rose-500/20 text-rose-400 p-3 rounded-xl text-[11px] leading-relaxed flex items-start gap-2">
+              <div className="bg-rose-50 border border-rose-100 text-rose-600 p-3 rounded-xl text-[11px] leading-relaxed flex items-start gap-2">
                 <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5 text-rose-500" />
                 <span>{loginError}</span>
               </div>
@@ -529,7 +513,7 @@ export default function App() {
 
             <button
               type="submit"
-              className="w-full py-3 bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-white font-extrabold text-xs tracking-wide uppercase rounded-xl transition-all shadow-md shadow-blue-500/10 hover:shadow-blue-500/20 cursor-pointer"
+              className="w-full py-3 bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-white font-extrabold text-xs tracking-wide uppercase rounded-xl transition-all shadow-md shadow-blue-500/10 hover:shadow-blue-500/25 cursor-pointer"
             >
               Access Clinical Suite
             </button>
