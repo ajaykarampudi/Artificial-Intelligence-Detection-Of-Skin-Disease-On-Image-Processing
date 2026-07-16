@@ -410,6 +410,19 @@ export default function App() {
             <p className="text-[10px] text-slate-400 font-semibold tracking-wider uppercase">Clinical Support Assistant</p>
           </div>
         </div>
+        {currentUser && (
+          <button
+            onClick={() => { setActiveTab('profile'); setViewHistoryItem(null); }}
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border text-xs font-bold transition-all cursor-pointer ${
+              activeTab === 'profile'
+                ? 'bg-blue-600 border-blue-600 text-white shadow-sm'
+                : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50 hover:text-slate-900 shadow-sm'
+            }`}
+          >
+            <User className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">{currentUser.name}</span>
+          </button>
+        )}
       </header>
 
       {/* DASHBOARD OUTER SHELL */}
@@ -487,16 +500,6 @@ export default function App() {
               </button>
             )}
 
-            <button
-              onClick={() => { setActiveTab('profile'); setViewHistoryItem(null); }}
-              className={`w-full text-left px-4 py-2.5 rounded-lg text-xs font-bold flex items-center gap-3 transition-all cursor-pointer ${
-                activeTab === 'profile' 
-                  ? 'bg-blue-600 text-white shadow-sm' 
-                  : 'text-slate-600 hover:bg-slate-50 hover:text-slate-950'
-              }`}
-            >
-              <User className="w-4 h-4" /> My Profile
-            </button>
           </nav>
 
         </aside>
