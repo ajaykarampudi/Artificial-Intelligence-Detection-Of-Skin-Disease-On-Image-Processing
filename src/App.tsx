@@ -573,77 +573,84 @@ export default function App() {
             <p className="text-[10px] text-slate-400 font-semibold tracking-wider uppercase">Clinical Support Assistant</p>
           </div>
         </div>
-        <div className="relative">
+        <div className="flex items-center gap-3">
           {currentUser && (
-            <button
-              id="profile-button"
-              onClick={() => setShowProfileDropdown(!showProfileDropdown)}
-              className={`p-2 rounded-full border transition-all cursor-pointer flex items-center justify-center ${
-                showProfileDropdown
-                  ? 'bg-blue-600 border-blue-600 text-white shadow-md'
-                  : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50 hover:text-slate-800 shadow-sm'
-              }`}
-              title="My Profile"
-            >
-              <User className="w-4 h-4" />
-            </button>
+            <span className="text-xs font-bold text-slate-500 hidden sm:inline">
+              Welcome to, <span className="text-slate-800 font-extrabold">{currentUser.name}</span>
+            </span>
           )}
-
-          {showProfileDropdown && currentUser && (
-            <div 
-              id="profile-dropdown"
-              className="absolute right-0 mt-2 w-72 bg-white rounded-xl shadow-xl border border-slate-200 p-4 z-50 animate-scale-in text-xs space-y-4"
-            >
-              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-                <span className="font-extrabold text-slate-900 text-sm">Account Profile</span>
-                <button 
-                  onClick={() => setShowProfileDropdown(false)}
-                  className="text-slate-400 hover:text-slate-600"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              </div>
-
-              <div className="flex items-center gap-3">
-                <div className="bg-blue-50 text-blue-600 p-2 rounded-full">
-                  <User className="w-5 h-5" />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <h4 className="font-extrabold text-slate-800 truncate">{currentUser.name}</h4>
-                  <p className="text-slate-400 text-[10px] truncate font-mono">{currentUser.email}</p>
-                </div>
-              </div>
-
-              <div className="space-y-2 border-t border-b border-slate-100 py-3">
-                <div className="flex justify-between">
-                  <span className="text-slate-400">Gender:</span>
-                  <span className="font-bold text-slate-700">{currentUser.gender || "Not specified"}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-400">Age:</span>
-                  <span className="font-bold text-slate-700">{currentUser.age ? `${currentUser.age} Years` : "Not specified"}</span>
-                </div>
-
-                <div className="flex justify-between">
-                  <span className="text-slate-400">Registered:</span>
-                  <span className="font-bold text-slate-700 font-mono">
-                    {new Date(currentUser.created_at).toLocaleDateString()}
-                  </span>
-                </div>
-              </div>
-
+          <div className="relative">
+            {currentUser && (
               <button
-                onClick={() => {
-                  setCurrentUser(null);
-                  setShowProfileDropdown(false);
-                }}
-                className="w-full py-2 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-lg font-bold transition-all text-[11px] cursor-pointer mt-2 text-center"
+                id="profile-button"
+                onClick={() => setShowProfileDropdown(!showProfileDropdown)}
+                className={`p-2 rounded-full border transition-all cursor-pointer flex items-center justify-center ${
+                  showProfileDropdown
+                    ? 'bg-blue-600 border-blue-600 text-white shadow-md'
+                    : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50 hover:text-slate-800 shadow-sm'
+                }`}
+                title="My Profile"
               >
-                Sign Out
+                <User className="w-4 h-4" />
               </button>
+            )}
 
-            </div>
-          )}
+            {showProfileDropdown && currentUser && (
+              <div 
+                id="profile-dropdown"
+                className="absolute right-0 mt-2 w-72 bg-white rounded-xl shadow-xl border border-slate-200 p-4 z-50 animate-scale-in text-xs space-y-4"
+              >
+                <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                  <span className="font-extrabold text-slate-900 text-sm">Account Profile</span>
+                  <button 
+                    onClick={() => setShowProfileDropdown(false)}
+                    className="text-slate-400 hover:text-slate-600"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+
+                <div className="flex items-center gap-3">
+                  <div className="bg-blue-50 text-blue-600 p-2 rounded-full">
+                    <User className="w-5 h-5" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <h4 className="font-extrabold text-slate-800 truncate">{currentUser.name}</h4>
+                    <p className="text-slate-400 text-[10px] truncate font-mono">{currentUser.email}</p>
+                  </div>
+                </div>
+
+                <div className="space-y-2 border-t border-b border-slate-100 py-3">
+                  <div className="flex justify-between">
+                    <span className="text-slate-400">Gender:</span>
+                    <span className="font-bold text-slate-700">{currentUser.gender || "Not specified"}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-slate-400">Age:</span>
+                    <span className="font-bold text-slate-700">{currentUser.age ? `${currentUser.age} Years` : "Not specified"}</span>
+                  </div>
+
+                  <div className="flex justify-between">
+                    <span className="text-slate-400">Registered:</span>
+                    <span className="font-bold text-slate-700 font-mono">
+                      {new Date(currentUser.created_at).toLocaleDateString()}
+                    </span>
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => {
+                    setCurrentUser(null);
+                    setShowProfileDropdown(false);
+                  }}
+                  className="w-full py-2 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-lg font-bold transition-all text-[11px] cursor-pointer mt-2 text-center"
+                >
+                  Sign Out
+                </button>
+
+              </div>
+            )}
+          </div>
         </div>
       </header>
 
