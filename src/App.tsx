@@ -470,15 +470,6 @@ export default function App() {
                 </div>
               </div>
 
-              <button
-                onClick={() => {
-                  toggleRole();
-                  setShowProfileDropdown(false);
-                }}
-                className="w-full py-2 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-lg font-bold transition-all text-[11px] cursor-pointer"
-              >
-                Switch Sandbox Role ({currentUser.role === 'admin' ? 'Patient' : 'Dermatologist'})
-              </button>
             </div>
           )}
         </div>
