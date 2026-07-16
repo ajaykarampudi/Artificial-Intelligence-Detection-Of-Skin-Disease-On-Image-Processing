@@ -149,7 +149,7 @@ DISCLAIMER: Always emphasize that this is for informational support only, but an
     ]
   };
 
-  const modelsToTry = ["gemini-2.5-flash", "gemini-1.5-flash"];
+  const modelsToTry = ["gemini-3.5-flash", "gemini-3.1-flash-lite"];
   let response: any = null;
   let lastError: any = null;
 
@@ -258,7 +258,7 @@ General Guidelines:
     parts: [{ text: message }]
   });
 
-  const modelsToTry = ["gemini-2.5-flash", "gemini-1.5-flash"];
+  const modelsToTry = ["gemini-3.5-flash", "gemini-3.1-flash-lite"];
   let response: any = null;
   let lastError: any = null;
 
