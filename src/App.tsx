@@ -8,6 +8,7 @@ import CameraCapture from "./components/CameraCapture";
 import MedicalChatbot from "./components/MedicalChatbot";
 import HospitalLocator from "./components/HospitalLocator";
 import { generateDiagnosticPDF } from "./utils/pdfGenerator";
+import { analyzeSkinImage } from "./lib/gemini";
 
 const LOGO_IMAGE = "https://ik.imagekit.io/lz4kwvpha/Logo.jpeg";
 
@@ -299,27 +300,8 @@ export default function App() {
     setLoading(true);
     setScanStatus("Analyzing epidermal features...");
 
-    const apiBase = window.location.hostname === "localhost" && window.location.port !== "3000" ? "http://localhost:3000" : "";
-
     try {
-      const response = await fetch(`${apiBase}/api/predict`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          image_data: imagePreview,
-          mime_type: "image/jpeg",
-          custom_diseases: diseases // Include current custom added diseases for matching constraints
-        })
-      });
-
-      if (!response.ok) {
-        const errPayload = await response.json();
-        throw new Error(errPayload.error || "Model service returned an unexpected validation failure.");
-      }
-
-      const predictedDetails = await response.json();
+      const predictedDetails = await analyzeSkinImage(imagePreview, "image/jpeg", diseases);
 
       if (predictedDetails.is_valid_image === false) {
         setImageQualityError(predictedDetails.rejection_reason || "The uploaded image is not clear or does not appear to be a skin condition. Please upload a neat and quality image.");

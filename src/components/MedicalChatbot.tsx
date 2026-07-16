@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import ReactMarkdown from "react-markdown";
+import { chatWithGemini } from "../lib/gemini";
 import { 
   Bot, 
   Send, 
@@ -315,44 +316,7 @@ export default function MedicalChatbot() {
           text: m.text
         }));
 
-      const apiBase = window.location.hostname === "localhost" && window.location.port !== "3000" ? "http://localhost:3000" : "";
-      const response = await fetch(`${apiBase}/api/chat`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          message: textToSubmit,
-          history: chatHistory.slice(0, -1), // pass history excluding the last message itself
-          language: getLanguageName(currentLanguage)
-        })
-      });
-
-      if (!response.ok) {
-        let errMsg = "Failed to communicate with medical assistant server API.";
-        try {
-          const contentType = response.headers.get("content-type");
-          if (contentType && contentType.includes("application/json")) {
-            const errPayload = await response.json();
-            errMsg = errPayload.error || errMsg;
-          } else {
-            errMsg = `Server error (${response.status}): The backend returned an invalid non-JSON response. Please verify the backend logs on Render.`;
-          }
-        } catch (e) {
-          // ignore
-        }
-        throw new Error(errMsg);
-      }
-
-      const contentType = response.headers.get("content-type");
-      if (!contentType || !contentType.includes("application/json")) {
-        throw new Error("The server returned a non-JSON response. Please ensure the backend server is running and configured correctly.");
-      }
-
-      const data = await response.json();
-      if (data.error) {
-        throw new Error(data.error);
-      }
-
-      let replyText = data.reply || "";
+      let replyText = await chatWithGemini(textToSubmit, chatHistory.slice(0, -1), getLanguageName(currentLanguage));
       const langMatch = replyText.match(/\[SET_LANGUAGE\](.*?)\[\/SET_LANGUAGE\]/i);
       if (langMatch) {
         const newLangCode = langMatch[1].trim();
