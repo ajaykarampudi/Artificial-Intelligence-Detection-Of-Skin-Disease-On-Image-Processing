@@ -23,7 +23,7 @@ import {
 } from "lucide-react";
 
 // The path of the generated DermAI avatar image
-const AVATAR_IMAGE = "/src/assets/images/dermai_avatar_1782845031441.jpg";
+const AVATAR_IMAGE = "https://ik.imagekit.io/lz4kwvpha/dermai_avatar_1782845031441.jpg";
 
 interface Message {
   id: string;
