@@ -659,7 +659,7 @@ export default function App() {
               type="submit"
               className="w-full py-3 bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-white font-extrabold text-xs tracking-wide uppercase rounded-xl transition-all shadow-md shadow-blue-500/10 hover:shadow-blue-500/25 cursor-pointer"
             >
-              {isRegistering ? "Create Account" : "Access Clinical Suite"}
+              {isRegistering ? "Register" : "Login"}
             </button>
 
             <div className="text-center pt-2">
