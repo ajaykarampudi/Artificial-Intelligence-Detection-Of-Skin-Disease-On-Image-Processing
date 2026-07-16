@@ -50,6 +50,9 @@ export default function App() {
   const [loginGender, setLoginGender] = useState<string>("");
   const [loginError, setLoginError] = useState<string | null>(null);
   const [isRegistering, setIsRegistering] = useState<boolean>(false);
+  const [onboardingAge, setOnboardingAge] = useState<string>("");
+  const [onboardingGender, setOnboardingGender] = useState<string>("");
+  const [onboardingError, setOnboardingError] = useState<string | null>(null);
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
@@ -138,6 +141,48 @@ export default function App() {
     } catch (err: any) {
       console.error("Authentication error:", err);
       setLoginError("An error occurred during authentication. Please try again.");
+    }
+  }
+
+  async function handleCompleteProfile(e: React.FormEvent) {
+    e.preventDefault();
+    if (!currentUser) return;
+    setOnboardingError(null);
+
+    const ageVal = parseInt(onboardingAge, 10);
+    if (isNaN(ageVal) || ageVal < 1 || ageVal > 120) {
+      setOnboardingError("Please enter a valid age between 1 and 120.");
+      return;
+    }
+
+    if (!onboardingGender) {
+      setOnboardingError("Please select your gender.");
+      return;
+    }
+
+    try {
+      const dbProfile = await getUserProfile(currentUser.id);
+      const originalName = dbProfile ? dbProfile.name : currentUser.name;
+
+      const updatedProfile: UserProfile = {
+        ...currentUser,
+        name: originalName,
+        age: ageVal,
+        gender: onboardingGender
+      };
+
+      await saveUserProfile(updatedProfile);
+
+      setCurrentUser({
+        ...updatedProfile,
+        name: currentUser.name
+      });
+      
+      setOnboardingAge("");
+      setOnboardingGender("");
+    } catch (err: any) {
+      console.error("Error updating onboarding profile:", err);
+      setOnboardingError("An error occurred while saving your profile. Please try again.");
     }
   }
 
@@ -596,6 +641,71 @@ export default function App() {
                 {isRegistering ? "Already have an account? Sign In" : "Need an account? Register new account"}
               </button>
             </div>
+          </form>
+        </div>
+      </div>
+    );
+  }
+
+  if (currentUser && (!currentUser.age || !currentUser.gender)) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex flex-col justify-center items-center p-6 relative overflow-hidden font-sans">
+        {/* Decorative background shapes */}
+        <div className="absolute top-[-20%] left-[-10%] w-[500px] h-[500px] rounded-full bg-blue-500/5 blur-[120px] pointer-events-none" />
+        <div className="absolute bottom-[-20%] right-[-10%] w-[500px] h-[500px] rounded-full bg-indigo-500/5 blur-[120px] pointer-events-none" />
+
+        <div className="w-full max-w-md bg-white border border-slate-200 shadow-2xl rounded-2xl p-8 space-y-6 relative z-10 animate-fade-in">
+          <div className="text-center space-y-2">
+            <div className="inline-flex items-center justify-center p-3 bg-blue-50 rounded-2xl border border-blue-100 shadow-sm mb-2 text-blue-600">
+              <User className="w-8 h-8" />
+            </div>
+            <h2 className="text-xl md:text-2xl font-black text-slate-900 tracking-tight">Complete Your Profile</h2>
+            <p className="text-slate-500 text-xs">Please provide your clinical demographic details to proceed</p>
+          </div>
+
+          <form onSubmit={handleCompleteProfile} className="space-y-4">
+            <div className="space-y-1">
+              <label className="text-[10px] uppercase tracking-wider font-extrabold text-slate-500">Age (Years)</label>
+              <input
+                type="number"
+                required
+                min="1"
+                max="120"
+                value={onboardingAge}
+                onChange={(e) => setOnboardingAge(e.target.value)}
+                placeholder="e.g. 28"
+                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 hover:border-slate-300 focus:border-blue-500 focus:bg-white text-slate-800 rounded-xl text-xs transition-all outline-none"
+              />
+            </div>
+
+            <div className="space-y-1">
+              <label className="text-[10px] uppercase tracking-wider font-extrabold text-slate-500">Gender</label>
+              <select
+                required
+                value={onboardingGender}
+                onChange={(e) => setOnboardingGender(e.target.value)}
+                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 hover:border-slate-300 focus:border-blue-500 focus:bg-white text-slate-800 rounded-xl text-xs transition-all outline-none cursor-pointer"
+              >
+                <option value="">Select Gender</option>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+
+            {onboardingError && (
+              <div className="bg-rose-50 border border-rose-100 text-rose-600 p-3 rounded-xl text-[11px] leading-relaxed flex items-start gap-2">
+                <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5 text-rose-500" />
+                <span>{onboardingError}</span>
+              </div>
+            )}
+
+            <button
+              type="submit"
+              className="w-full py-3 bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-white font-extrabold text-xs tracking-wide uppercase rounded-xl transition-all shadow-md shadow-blue-500/10 hover:shadow-blue-500/25 cursor-pointer flex items-center justify-center gap-2"
+            >
+              Save Profile & Continue
+            </button>
           </form>
         </div>
       </div>
