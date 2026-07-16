@@ -568,34 +568,7 @@ export default function App() {
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-1">
-                <label className="text-[10px] uppercase tracking-wider font-extrabold text-slate-500">Age</label>
-                <input
-                  type="number"
-                  min="1"
-                  max="120"
-                  value={loginAge}
-                  onChange={(e) => setLoginAge(e.target.value)}
-                  placeholder="e.g. 28"
-                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 hover:border-slate-300 focus:border-blue-500 focus:bg-white text-slate-800 rounded-xl text-xs transition-all outline-none"
-                />
-              </div>
 
-              <div className="space-y-1">
-                <label className="text-[10px] uppercase tracking-wider font-extrabold text-slate-500">Gender</label>
-                <select
-                  value={loginGender}
-                  onChange={(e) => setLoginGender(e.target.value)}
-                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 hover:border-slate-300 focus:border-blue-500 focus:bg-white text-slate-800 rounded-xl text-xs transition-all outline-none cursor-pointer"
-                >
-                  <option value="">Select</option>
-                  <option value="Male">Male</option>
-                  <option value="Female">Female</option>
-                  <option value="Other">Other</option>
-                </select>
-              </div>
-            </div>
 
             {loginError && (
               <div className="bg-rose-50 border border-rose-100 text-rose-600 p-3 rounded-xl text-[11px] leading-relaxed flex items-start gap-2">
