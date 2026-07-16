@@ -39,16 +39,56 @@ import {
 } from "lucide-react";
 
 export default function App() {
-  const [currentUser, setCurrentUser] = useState<UserProfile | null>({
-    id: "sandbox-patient-456",
-    name: "Sandbox Patient",
-    email: "patient@sandbox.com",
-    role: "user",
-    created_at: new Date().toISOString()
-  });
+  const [currentUser, setCurrentUser] = useState<UserProfile | null>(null);
   const [authChecked, setAuthChecked] = useState<boolean>(true);
   const [activeTab, setActiveTab] = useState<'dashboard' | 'scan' | 'knowledge' | 'history' | 'admin' | 'profile' | 'hospitals'>('dashboard');
   const [showProfileDropdown, setShowProfileDropdown] = useState<boolean>(false);
+  const [loginName, setLoginName] = useState<string>("");
+  const [loginEmail, setLoginEmail] = useState<string>("");
+  const [loginAge, setLoginAge] = useState<string>("");
+  const [loginGender, setLoginGender] = useState<string>("");
+  const [loginError, setLoginError] = useState<string | null>(null);
+
+  function handleLogin(e: React.FormEvent) {
+    e.preventDefault();
+    setLoginError(null);
+
+    const email = loginEmail.trim().toLowerCase();
+    const name = loginName.trim();
+
+    if (!email || !name) {
+      setLoginError("Please enter both your name and email address.");
+      return;
+    }
+
+    let role: 'user' | 'admin' = 'user';
+    if (email.endsWith("@gmail.com")) {
+      role = 'user';
+    } else if (email.endsWith("@doctor.com") || email.endsWith("@admin.com")) {
+      role = 'admin';
+    } else {
+      setLoginError("Access Denied: Please use a valid email extension (@gmail.com, @doctor.com, or @admin.com) to access the system.");
+      return;
+    }
+
+    const ageVal = loginAge ? parseInt(loginAge, 10) : undefined;
+
+    const profile: UserProfile = {
+      id: `usr-${Math.random().toString(36).substr(2, 9)}`,
+      name: name,
+      email: email,
+      role: role,
+      age: ageVal,
+      gender: loginGender || undefined,
+      created_at: new Date().toISOString()
+    };
+
+    setCurrentUser(profile);
+    setLoginName("");
+    setLoginEmail("");
+    setLoginAge("");
+    setLoginGender("");
+  }
 
   function toggleRole() {
     if (!currentUser) return;
@@ -389,6 +429,116 @@ export default function App() {
     }
   };
 
+  if (!currentUser) {
+    return (
+      <div className="min-h-screen bg-slate-900 flex flex-col justify-center items-center p-6 relative overflow-hidden font-sans">
+        {/* Decorative background shapes */}
+        <div className="absolute top-[-20%] left-[-10%] w-[500px] h-[500px] rounded-full bg-blue-500/10 blur-[120px] pointer-events-none" />
+        <div className="absolute bottom-[-20%] right-[-10%] w-[500px] h-[500px] rounded-full bg-indigo-500/10 blur-[120px] pointer-events-none" />
+
+        <div className="w-full max-w-md bg-slate-950/80 backdrop-blur-xl border border-slate-800 shadow-2xl rounded-2xl p-8 space-y-6 relative z-10 animate-fade-in">
+          <div className="text-center space-y-2">
+            <div className="inline-flex items-center justify-center p-3.5 bg-blue-500/10 rounded-2xl border border-blue-500/20 shadow-inner mb-2">
+              <img 
+                src="https://ik.imagekit.io/lz4kwvpha/Logo.jpeg" 
+                alt="Logo" 
+                className="w-12 h-12 object-cover rounded-xl shadow-md border border-slate-700/50"
+              />
+            </div>
+            <h2 className="text-xl md:text-2xl font-black text-white tracking-tight">DermAI Clinical Portal</h2>
+            <p className="text-slate-400 text-xs">Access the artificial intelligence diagnostic suite</p>
+          </div>
+
+          <form onSubmit={handleLogin} className="space-y-4">
+            <div className="space-y-1">
+              <label className="text-[10px] uppercase tracking-wider font-extrabold text-slate-400">Full Name</label>
+              <input
+                type="text"
+                required
+                value={loginName}
+                onChange={(e) => setLoginName(e.target.value)}
+                placeholder="e.g. John Doe"
+                className="w-full px-4 py-2.5 bg-slate-900 border border-slate-800 hover:border-slate-700 focus:border-blue-500 text-white rounded-xl text-xs transition-all outline-none"
+              />
+            </div>
+
+            <div className="space-y-1">
+              <label className="text-[10px] uppercase tracking-wider font-extrabold text-slate-400">Email Address</label>
+              <input
+                type="email"
+                required
+                value={loginEmail}
+                onChange={(e) => setLoginEmail(e.target.value)}
+                placeholder="e.g. user@gmail.com, doctor@doctor.com"
+                className="w-full px-4 py-2.5 bg-slate-900 border border-slate-800 hover:border-slate-700 focus:border-blue-500 text-white rounded-xl text-xs transition-all outline-none"
+              />
+              <div className="bg-slate-900/50 border border-slate-800/80 rounded-xl p-3 text-[10px] text-slate-400 leading-relaxed space-y-1 mt-1.5">
+                <span className="font-bold text-slate-300">ℹ️ Domain Roles Configuration:</span>
+                <div className="grid grid-cols-3 gap-2 mt-1">
+                  <div className="bg-slate-950 p-1.5 rounded border border-slate-850 text-center">
+                    <span className="font-bold text-slate-300">@gmail.com</span>
+                    <span className="block text-[8px] text-blue-400 uppercase mt-0.5">Patient</span>
+                  </div>
+                  <div className="bg-slate-950 p-1.5 rounded border border-slate-850 text-center">
+                    <span className="font-bold text-slate-300">@doctor.com</span>
+                    <span className="block text-[8px] text-emerald-400 uppercase mt-0.5">Doctor</span>
+                  </div>
+                  <div className="bg-slate-950 p-1.5 rounded border border-slate-850 text-center">
+                    <span className="font-bold text-slate-300">@admin.com</span>
+                    <span className="block text-[8px] text-purple-400 uppercase mt-0.5">Admin</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-1">
+                <label className="text-[10px] uppercase tracking-wider font-extrabold text-slate-400">Age (Optional)</label>
+                <input
+                  type="number"
+                  min="1"
+                  max="120"
+                  value={loginAge}
+                  onChange={(e) => setLoginAge(e.target.value)}
+                  placeholder="e.g. 28"
+                  className="w-full px-4 py-2.5 bg-slate-900 border border-slate-800 hover:border-slate-700 focus:border-blue-500 text-white rounded-xl text-xs transition-all outline-none"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-[10px] uppercase tracking-wider font-extrabold text-slate-400">Gender (Optional)</label>
+                <select
+                  value={loginGender}
+                  onChange={(e) => setLoginGender(e.target.value)}
+                  className="w-full px-4 py-2.5 bg-slate-900 border border-slate-800 hover:border-slate-700 focus:border-blue-500 text-white rounded-xl text-xs transition-all outline-none cursor-pointer"
+                >
+                  <option value="" className="bg-slate-950">Select</option>
+                  <option value="Male" className="bg-slate-950">Male</option>
+                  <option value="Female" className="bg-slate-950">Female</option>
+                  <option value="Other" className="bg-slate-950">Other</option>
+                </select>
+              </div>
+            </div>
+
+            {loginError && (
+              <div className="bg-rose-500/10 border border-rose-500/20 text-rose-400 p-3 rounded-xl text-[11px] leading-relaxed flex items-start gap-2">
+                <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5 text-rose-500" />
+                <span>{loginError}</span>
+              </div>
+            )}
+
+            <button
+              type="submit"
+              className="w-full py-3 bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-white font-extrabold text-xs tracking-wide uppercase rounded-xl transition-all shadow-md shadow-blue-500/10 hover:shadow-blue-500/20 cursor-pointer"
+            >
+              Access Clinical Suite
+            </button>
+          </form>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col font-sans text-slate-800">
       {/* GLOBAL HIGH-CONTRAST MEDICAL DISCLAIMER BANNER */}
@@ -469,6 +619,16 @@ export default function App() {
                   </span>
                 </div>
               </div>
+
+              <button
+                onClick={() => {
+                  setCurrentUser(null);
+                  setShowProfileDropdown(false);
+                }}
+                className="w-full py-2 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-lg font-bold transition-all text-[11px] cursor-pointer mt-2 text-center"
+              >
+                Sign Out
+              </button>
 
             </div>
           )}
