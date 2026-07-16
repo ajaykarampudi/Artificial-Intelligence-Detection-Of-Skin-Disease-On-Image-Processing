@@ -415,9 +415,6 @@ export default function App() {
       {/* HEADER SECTION */}
       <header className="bg-white border-b border-slate-200 py-3 px-6 md:px-12 flex items-center justify-between sticky top-0 z-40 shadow-sm">
         <div className="flex items-center gap-3">
-          <div className="bg-blue-600 text-white p-2 rounded-lg shadow-sm flex items-center justify-center">
-            <Activity className="w-4 h-4" />
-          </div>
           <div>
             <h1 className="font-extrabold text-slate-900 tracking-tight text-sm md:text-base">Epidermal Analysis System</h1>
             <p className="text-[10px] text-slate-400 font-semibold tracking-wider uppercase">Clinical Support Assistant</p>

@@ -329,12 +329,22 @@ export default function MedicalChatbot() {
       if (!response.ok) {
         let errMsg = "Failed to communicate with medical assistant server API.";
         try {
-          const errPayload = await response.json();
-          errMsg = errPayload.error || errMsg;
+          const contentType = response.headers.get("content-type");
+          if (contentType && contentType.includes("application/json")) {
+            const errPayload = await response.json();
+            errMsg = errPayload.error || errMsg;
+          } else {
+            errMsg = `Server error (${response.status}): The backend returned an invalid non-JSON response. Please verify the backend logs on Render.`;
+          }
         } catch (e) {
           // ignore
         }
         throw new Error(errMsg);
+      }
+
+      const contentType = response.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        throw new Error("The server returned a non-JSON response. Please ensure the backend server is running and configured correctly.");
       }
 
       const data = await response.json();
