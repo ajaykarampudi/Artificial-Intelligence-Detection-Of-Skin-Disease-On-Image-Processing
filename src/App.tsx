@@ -153,6 +153,35 @@ export default function App() {
     }
   }, [currentUser]);
 
+  // Handle click outside and Escape key press to close profile dropdown
+  useEffect(() => {
+    if (!showProfileDropdown) return;
+
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === "Escape") {
+        setShowProfileDropdown(false);
+      }
+    }
+
+    function handleClickOutside(e: MouseEvent) {
+      const target = e.target as HTMLElement;
+      const dropdownEl = document.getElementById("profile-dropdown");
+      const buttonEl = document.getElementById("profile-button");
+      
+      if (dropdownEl && !dropdownEl.contains(target) && buttonEl && !buttonEl.contains(target)) {
+        setShowProfileDropdown(false);
+      }
+    }
+
+    window.addEventListener("keydown", handleKeyDown);
+    window.addEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [showProfileDropdown]);
+
   async function loadApplicationData() {
     try {
       const dbDiseases = await getDiseases(currentUser?.role === "admin");
@@ -547,6 +576,7 @@ export default function App() {
         <div className="relative">
           {currentUser && (
             <button
+              id="profile-button"
               onClick={() => setShowProfileDropdown(!showProfileDropdown)}
               className={`p-2 rounded-full border transition-all cursor-pointer flex items-center justify-center ${
                 showProfileDropdown
@@ -560,7 +590,10 @@ export default function App() {
           )}
 
           {showProfileDropdown && currentUser && (
-            <div className="absolute right-0 mt-2 w-72 bg-white rounded-xl shadow-xl border border-slate-200 p-4 z-50 animate-scale-in text-xs space-y-4">
+            <div 
+              id="profile-dropdown"
+              className="absolute right-0 mt-2 w-72 bg-white rounded-xl shadow-xl border border-slate-200 p-4 z-50 animate-scale-in text-xs space-y-4"
+            >
               <div className="flex items-center justify-between border-b border-slate-100 pb-3">
                 <span className="font-extrabold text-slate-900 text-sm">Account Profile</span>
                 <button 
