@@ -57,9 +57,10 @@ export default function App() {
 
     const email = loginEmail.trim().toLowerCase();
     const name = loginName.trim();
+    const password = loginPassword.trim();
 
-    if (!email || !name) {
-      setLoginError("Please enter both your name and email address.");
+    if (!email || !name || !password) {
+      setLoginError("Please enter your name, email address, and password.");
       return;
     }
 
@@ -78,35 +79,53 @@ export default function App() {
 
     try {
       if (isRegistering) {
-        // Save the profile record in Supabase
-        const profile: UserProfile = {
+        // Check if user already exists
+        const existingProfile = await getUserProfile(userId);
+        if (existingProfile) {
+          setLoginError("An account with this email address already exists. Please Sign In.");
+          return;
+        }
+
+        // Save the profile record in Supabase with password packed into the name column
+        const dbProfile: UserProfile = {
           id: userId,
-          name: name,
+          name: `${name}|||${password}`,
           email: email,
           role: role,
           age: ageVal,
           gender: loginGender || undefined,
           created_at: new Date().toISOString()
         };
-        await saveUserProfile(profile);
-        setCurrentUser(profile);
+        await saveUserProfile(dbProfile);
+        setCurrentUser({ ...dbProfile, name: name });
       } else {
-        // Retrieve profile if exists, else dynamically auto-create it
+        // Login mode
         const existingProfile = await getUserProfile(userId);
         if (existingProfile) {
-          setCurrentUser(existingProfile);
+          // Parse password and actual name
+          if (existingProfile.name.includes("|||")) {
+            const parts = existingProfile.name.split("|||");
+            const actualName = parts[0];
+            const storedPassword = parts[1];
+
+            if (storedPassword === password) {
+              setCurrentUser({ ...existingProfile, name: actualName });
+            } else {
+              setLoginError("Incorrect password. Please verify your credentials and try again.");
+              return;
+            }
+          } else {
+            // Legacy user without password stored - log in and upgrade them to store this password!
+            const updatedProfile: UserProfile = {
+              ...existingProfile,
+              name: `${existingProfile.name}|||${password}`
+            };
+            await saveUserProfile(updatedProfile);
+            setCurrentUser(existingProfile);
+          }
         } else {
-          const profile: UserProfile = {
-            id: userId,
-            name: name,
-            email: email,
-            role: role,
-            age: ageVal,
-            gender: loginGender || undefined,
-            created_at: new Date().toISOString()
-          };
-          await saveUserProfile(profile);
-          setCurrentUser(profile);
+          setLoginError("Account not found. Please switch to the registration tab to create a new account.");
+          return;
         }
       }
 
