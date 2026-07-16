@@ -73,7 +73,7 @@ export default function App() {
     } else if (email.endsWith("@doctor.com") || email.endsWith("@admin.com")) {
       role = 'admin';
     } else {
-      setLoginError("Access Denied: Please use a valid email extension (@gmail.com, @doctor.com, or @admin.com) to access the system.");
+      setLoginError("Invalid email address.");
       return;
     }
 
