@@ -9,7 +9,6 @@ import MedicalChatbot from "./components/MedicalChatbot";
 import HospitalLocator from "./components/HospitalLocator";
 import { generateDiagnosticPDF } from "./utils/pdfGenerator";
 
-const LOGO_IMAGE = "/src/assets/images/Logo.jpeg";
 import { 
   ShieldAlert, 
   Activity, 
@@ -417,11 +416,6 @@ export default function App() {
       {/* HEADER SECTION */}
       <header className="bg-white border-b border-slate-200 py-3 px-6 md:px-12 flex items-center justify-between sticky top-0 z-40 shadow-sm">
         <div className="flex items-center gap-3">
-          <img 
-            src={LOGO_IMAGE} 
-            alt="Epidermal Analysis System Logo" 
-            className="w-9 h-9 object-cover rounded-lg shadow-sm border border-slate-200" 
-          />
           <div>
             <h1 className="font-extrabold text-slate-900 tracking-tight text-sm md:text-base">Epidermal Analysis System</h1>
             <p className="text-[10px] text-slate-400 font-semibold tracking-wider uppercase">Clinical Support Assistant</p>
