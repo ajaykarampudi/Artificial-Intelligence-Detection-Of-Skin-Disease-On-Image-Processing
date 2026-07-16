@@ -62,8 +62,8 @@ export default function App() {
     const name = loginName.trim();
     const password = loginPassword.trim();
 
-    if (!email || !name || !password) {
-      setLoginError("Please enter your name, email address, and password.");
+    if (!email || !password || (isRegistering && !name)) {
+      setLoginError(isRegistering ? "Please enter your name, email address, and password." : "Please enter your email address and password.");
       return;
     }
 
@@ -577,17 +577,19 @@ export default function App() {
           </div>
 
           <form onSubmit={handleLogin} className="space-y-4">
-            <div className="space-y-1">
-              <label className="text-[10px] uppercase tracking-wider font-extrabold text-slate-500">Full Name</label>
-              <input
-                type="text"
-                required
-                value={loginName}
-                onChange={(e) => setLoginName(e.target.value)}
-                placeholder="e.g. John Doe"
-                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 hover:border-slate-300 focus:border-blue-500 focus:bg-white text-slate-800 rounded-xl text-xs transition-all outline-none"
-              />
-            </div>
+            {isRegistering && (
+              <div className="space-y-1 animate-fade-in">
+                <label className="text-[10px] uppercase tracking-wider font-extrabold text-slate-500">Full Name</label>
+                <input
+                  type="text"
+                  required
+                  value={loginName}
+                  onChange={(e) => setLoginName(e.target.value)}
+                  placeholder="e.g. John Doe"
+                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 hover:border-slate-300 focus:border-blue-500 focus:bg-white text-slate-800 rounded-xl text-xs transition-all outline-none"
+                />
+              </div>
+            )}
 
             <div className="space-y-1">
               <label className="text-[10px] uppercase tracking-wider font-extrabold text-slate-500">Email Address</label>
