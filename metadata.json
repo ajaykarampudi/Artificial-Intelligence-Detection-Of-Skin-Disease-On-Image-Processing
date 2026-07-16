@@ -1,0 +1,5 @@
+{
+  "name": "Skin Disease Detection and Treatment System",
+  "description": "AI-powered web application for skin disease detection, confidence score analysis, details, severity assessment, specialist referral, and treatment guidance.",
+  "requestFramePermissions": ["camera", "microphone"]
+}
