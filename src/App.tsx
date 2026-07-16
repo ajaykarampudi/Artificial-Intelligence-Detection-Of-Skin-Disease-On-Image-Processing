@@ -590,10 +590,7 @@ export default function App() {
                   <span className="text-slate-400">Age:</span>
                   <span className="font-bold text-slate-700">{currentUser.age ? `${currentUser.age} Years` : "Not specified"}</span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-400">Account Type:</span>
-                  <span className="font-bold text-slate-700 capitalize">{currentUser.role}</span>
-                </div>
+
                 <div className="flex justify-between">
                   <span className="text-slate-400">Registered:</span>
                   <span className="font-bold text-slate-700 font-mono">
