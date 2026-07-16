@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { UserProfile, DiseaseInfo, PredictionRecord, SystemStats } from "./types";
-import { getDiseases, getUserPredictions, getSystemStats, savePrediction, deletePrediction } from "./lib/db";
+import { getDiseases, getUserPredictions, getSystemStats, savePrediction, deletePrediction, saveUserProfile, getUserProfile } from "./lib/db";
 import KnowledgeBase from "./components/KnowledgeBase";
 import DashboardStats from "./components/DashboardStats";
 import AdminPanel from "./components/AdminPanel";
@@ -49,8 +49,9 @@ export default function App() {
   const [loginAge, setLoginAge] = useState<string>("");
   const [loginGender, setLoginGender] = useState<string>("");
   const [loginError, setLoginError] = useState<string | null>(null);
+  const [isRegistering, setIsRegistering] = useState<boolean>(false);
 
-  function handleLogin(e: React.FormEvent) {
+  async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
     setLoginError(null);
 
@@ -73,23 +74,52 @@ export default function App() {
     }
 
     const ageVal = loginAge ? parseInt(loginAge, 10) : undefined;
+    const userId = email;
 
-    const profile: UserProfile = {
-      id: `usr-${Math.random().toString(36).substr(2, 9)}`,
-      name: name,
-      email: email,
-      role: role,
-      age: ageVal,
-      gender: loginGender || undefined,
-      created_at: new Date().toISOString()
-    };
+    try {
+      if (isRegistering) {
+        // Save the profile record in Supabase
+        const profile: UserProfile = {
+          id: userId,
+          name: name,
+          email: email,
+          role: role,
+          age: ageVal,
+          gender: loginGender || undefined,
+          created_at: new Date().toISOString()
+        };
+        await saveUserProfile(profile);
+        setCurrentUser(profile);
+      } else {
+        // Retrieve profile if exists, else dynamically auto-create it
+        const existingProfile = await getUserProfile(userId);
+        if (existingProfile) {
+          setCurrentUser(existingProfile);
+        } else {
+          const profile: UserProfile = {
+            id: userId,
+            name: name,
+            email: email,
+            role: role,
+            age: ageVal,
+            gender: loginGender || undefined,
+            created_at: new Date().toISOString()
+          };
+          await saveUserProfile(profile);
+          setCurrentUser(profile);
+        }
+      }
 
-    setCurrentUser(profile);
-    setLoginName("");
-    setLoginEmail("");
-    setLoginPassword("");
-    setLoginAge("");
-    setLoginGender("");
+      setLoginName("");
+      setLoginEmail("");
+      setLoginPassword("");
+      setLoginAge("");
+      setLoginGender("");
+      setIsRegistering(false);
+    } catch (err: any) {
+      console.error("Authentication error:", err);
+      setLoginError("An error occurred during authentication. Please try again.");
+    }
   }
 
   function toggleRole() {
@@ -474,8 +504,12 @@ export default function App() {
               alt="Logo" 
               className="w-16 h-16 object-cover rounded-xl shadow-md border border-slate-200 mx-auto mb-2"
             />
-            <h2 className="text-xl md:text-2xl font-black text-slate-900 tracking-tight">DermAI Clinical Portal</h2>
-            <p className="text-slate-500 text-xs">Access the artificial intelligence diagnostic suite</p>
+            <h2 className="text-xl md:text-2xl font-black text-slate-900 tracking-tight">
+              {isRegistering ? "Create DermAI Account" : "DermAI Clinical Portal"}
+            </h2>
+            <p className="text-slate-500 text-xs">
+              {isRegistering ? "Join the artificial intelligence diagnostic suite" : "Access the artificial intelligence diagnostic suite"}
+            </p>
           </div>
 
           <form onSubmit={handleLogin} className="space-y-4">
@@ -555,8 +589,21 @@ export default function App() {
               type="submit"
               className="w-full py-3 bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-white font-extrabold text-xs tracking-wide uppercase rounded-xl transition-all shadow-md shadow-blue-500/10 hover:shadow-blue-500/25 cursor-pointer"
             >
-              Access Clinical Suite
+              {isRegistering ? "Create Account" : "Access Clinical Suite"}
             </button>
+
+            <div className="text-center pt-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setIsRegistering(!isRegistering);
+                  setLoginError(null);
+                }}
+                className="text-xs text-blue-600 hover:text-blue-500 font-bold transition-all hover:underline cursor-pointer"
+              >
+                {isRegistering ? "Already have an account? Sign In" : "Need an account? Register new account"}
+              </button>
+            </div>
           </form>
         </div>
       </div>
