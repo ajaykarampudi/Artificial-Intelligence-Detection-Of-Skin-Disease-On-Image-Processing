@@ -413,14 +413,14 @@ export default function App() {
         {currentUser && (
           <button
             onClick={() => { setActiveTab('profile'); setViewHistoryItem(null); }}
-            className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border text-xs font-bold transition-all cursor-pointer ${
+            className={`p-2 rounded-full border transition-all cursor-pointer flex items-center justify-center ${
               activeTab === 'profile'
-                ? 'bg-blue-600 border-blue-600 text-white shadow-sm'
-                : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50 hover:text-slate-900 shadow-sm'
+                ? 'bg-blue-600 border-blue-600 text-white shadow-md'
+                : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50 hover:text-slate-800 shadow-sm'
             }`}
+            title="My Profile"
           >
-            <User className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">{currentUser.name}</span>
+            <User className="w-4 h-4" />
           </button>
         )}
       </header>
