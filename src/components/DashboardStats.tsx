@@ -112,14 +112,14 @@ export default function DashboardStats({ predictions, stats, isAdminView = false
       {predictions.length > 0 ? (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Occurrence Frequency (Bar Chart) */}
-          <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm lg:col-span-2 flex flex-col">
+          <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm lg:col-span-2">
             <div className="flex items-center gap-2 mb-6">
               <BarChart2 className="w-4 h-4 text-slate-400" />
               <h4 className="font-bold text-slate-900 text-sm uppercase tracking-wider">Condition Occurrences</h4>
             </div>
             
-            <div className="h-64 w-full flex-1">
-              <ResponsiveContainer width="100%" height="100%">
+            <div className="h-64 w-full">
+              <ResponsiveContainer width="100%" height={240}>
                 <BarChart data={diseaseData}>
                   <XAxis dataKey="name" stroke="#94a3b8" fontSize={11} tickLine={false} />
                   <YAxis stroke="#94a3b8" fontSize={11} tickLine={false} allowDecimals={false} />
@@ -134,21 +134,21 @@ export default function DashboardStats({ predictions, stats, isAdminView = false
           </div>
 
           {/* Severity Breakdown (Pie Chart) */}
-          <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm flex flex-col">
+          <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm">
             <div className="flex items-center gap-2 mb-4">
               <ShieldCheck className="w-4 h-4 text-slate-400" />
               <h4 className="font-bold text-slate-900 text-sm uppercase tracking-wider">Severity Classification</h4>
             </div>
 
-            <div className="h-48 w-full relative flex-1">
-              <ResponsiveContainer width="100%" height="100%">
+            <div className="h-48 w-full relative">
+              <ResponsiveContainer width="100%" height={180}>
                 <PieChart>
                   <Pie
                     data={severityData}
                     cx="50%"
                     cy="50%"
-                    innerRadius={60}
-                    outerRadius={80}
+                    innerRadius={50}
+                    outerRadius={70}
                     paddingAngle={5}
                     dataKey="value"
                   >
@@ -175,14 +175,14 @@ export default function DashboardStats({ predictions, stats, isAdminView = false
 
           {/* Confidence Rates History (Area Chart) */}
           {confidenceData.length > 0 && (
-            <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm lg:col-span-3 flex flex-col">
+            <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm lg:col-span-3">
               <div className="flex items-center gap-2 mb-6">
                 <Clock className="w-4 h-4 text-slate-400" />
                 <h4 className="font-bold text-slate-900 text-sm uppercase tracking-wider">Confidence Track Trend</h4>
               </div>
 
-              <div className="h-60 w-full flex-1">
-                <ResponsiveContainer width="100%" height="100%">
+              <div className="h-60 w-full">
+                <ResponsiveContainer width="100%" height={230}>
                   <AreaChart data={confidenceData}>
                     <defs>
                       <linearGradient id="colorConfidence" x1="0" y1="0" x2="0" y2="1">
