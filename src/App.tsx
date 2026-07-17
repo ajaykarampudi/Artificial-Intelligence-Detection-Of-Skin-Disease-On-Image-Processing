@@ -37,7 +37,8 @@ import {
   MapPin,
   X,
   Volume2,
-  VolumeX
+  VolumeX,
+  Bell
 } from "lucide-react";
 
 export default function App() {
@@ -234,6 +235,12 @@ export default function App() {
   const [scanStatus, setScanStatus] = useState<string>("");
   const [imageQualityError, setImageQualityError] = useState<string | null>(null);
   const [isSpeaking, setIsSpeaking] = useState<boolean>(false);
+  const [showNotifications, setShowNotifications] = useState<boolean>(false);
+  const [notifications, setNotifications] = useState([
+    { id: 1, text: "DermAI engine successfully initialized and running on backup model.", time: "Just now", read: false },
+    { id: 2, text: "Pathology Library expanded: 3 new skin conditions added with pictures.", time: "1 hour ago", read: false },
+    { id: 3, text: "Clinic Finder is active. Grant location permission for nearby clinic details.", time: "2 hours ago", read: true }
+  ]);
 
   // Zoom & Dermatological Lens states
   const [zoomLevel, setZoomLevel] = useState<number>(1);
@@ -252,23 +259,28 @@ export default function App() {
     }
   }, [currentUser]);
 
-  // Handle click outside and Escape key press to close profile dropdown
+  // Handle click outside and Escape key press to close profile and notification dropdowns
   useEffect(() => {
-    if (!showProfileDropdown) return;
-
     function handleKeyDown(e: KeyboardEvent) {
       if (e.key === "Escape") {
         setShowProfileDropdown(false);
+        setShowNotifications(false);
       }
     }
 
     function handleClickOutside(e: MouseEvent) {
       const target = e.target as HTMLElement;
-      const dropdownEl = document.getElementById("profile-dropdown");
-      const buttonEl = document.getElementById("profile-button");
       
-      if (dropdownEl && !dropdownEl.contains(target) && buttonEl && !buttonEl.contains(target)) {
+      const profileDropdown = document.getElementById("profile-dropdown");
+      const profileButton = document.getElementById("profile-button");
+      if (profileDropdown && !profileDropdown.contains(target) && profileButton && !profileButton.contains(target)) {
         setShowProfileDropdown(false);
+      }
+
+      const notifDropdown = document.getElementById("notifications-dropdown");
+      const notifButton = document.getElementById("notifications-button");
+      if (notifDropdown && !notifDropdown.contains(target) && notifButton && !notifButton.contains(target)) {
+        setShowNotifications(false);
       }
     }
 
@@ -279,7 +291,7 @@ export default function App() {
       window.removeEventListener("keydown", handleKeyDown);
       window.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [showProfileDropdown]);
+  }, []);
 
   async function loadApplicationData() {
     try {
@@ -827,11 +839,75 @@ Whom to contact for cure: ${specialist}.`;
               Welcome to, <span className="text-slate-800 font-extrabold">{currentUser.name}</span>
             </span>
           )}
+          
+          {/* Notifications Icon & Popover */}
+          {currentUser && (
+            <div className="relative">
+              <button
+                id="notifications-button"
+                onClick={() => {
+                  setShowNotifications(!showNotifications);
+                  setShowProfileDropdown(false);
+                }}
+                className={`p-2 rounded-full border transition-all cursor-pointer flex items-center justify-center relative ${
+                  showNotifications
+                    ? 'bg-blue-600 border-blue-600 text-white shadow-md'
+                    : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50 hover:text-slate-800 shadow-sm'
+                }`}
+                title="Notifications"
+              >
+                <Bell className="w-4 h-4" />
+                {notifications.some(n => !n.read) && (
+                  <span className="absolute top-1.5 right-1.5 flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-rose-500"></span>
+                  </span>
+                )}
+              </button>
+
+              {showNotifications && (
+                <div 
+                  id="notifications-dropdown"
+                  className="absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-xl border border-slate-200 p-4 z-50 animate-scale-in text-xs space-y-3"
+                  style={{ transformOrigin: "top right" }}
+                >
+                  <div className="flex justify-between items-center pb-2 border-b border-slate-150">
+                    <h3 className="font-extrabold text-slate-900 text-sm">Notifications</h3>
+                    <button 
+                      onClick={() => {
+                        setNotifications(notifications.map(n => ({ ...n, read: true })));
+                      }}
+                      className="text-[10px] text-blue-600 font-bold hover:underline cursor-pointer"
+                    >
+                      Mark all as read
+                    </button>
+                  </div>
+                  
+                  <div className="max-h-60 overflow-y-auto space-y-2.5 divide-y divide-slate-100 pr-1">
+                    {notifications.map((notif) => (
+                      <div key={notif.id} className={`pt-2.5 first:pt-0 flex gap-2.5 items-start ${!notif.read ? "bg-blue-50/20 -mx-2 px-2 rounded-md" : ""}`}>
+                        <div className={`w-1.5 h-1.5 rounded-full mt-1.5 shrink-0 ${!notif.read ? "bg-blue-500" : "bg-slate-300"}`} />
+                        <div className="space-y-0.5">
+                          <p className="text-[11px] text-slate-700 leading-normal font-medium">{notif.text}</p>
+                          <span className="text-[9px] text-slate-400 font-semibold">{notif.time}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Profile Icon & Popover */}
           <div className="relative">
             {currentUser && (
               <button
                 id="profile-button"
-                onClick={() => setShowProfileDropdown(!showProfileDropdown)}
+                onClick={() => {
+                  setShowProfileDropdown(!showProfileDropdown);
+                  setShowNotifications(false);
+                }}
                 className={`p-2 rounded-full border transition-all cursor-pointer flex items-center justify-center ${
                   showProfileDropdown
                     ? 'bg-blue-600 border-blue-600 text-white shadow-md'
