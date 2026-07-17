@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { DiseaseInfo } from "../types";
-import { Search, Heart, Shield, HelpCircle, Activity, Stethoscope, AlertTriangle, ChevronRight, X } from "lucide-react";
+import { Search, Heart, Shield, HelpCircle, Activity, Stethoscope, AlertTriangle, ChevronRight, X, Image as ImageIcon } from "lucide-react";
 
 interface KnowledgeBaseProps {
   diseases: DiseaseInfo[];
@@ -75,37 +75,48 @@ export default function KnowledgeBase({ diseases }: KnowledgeBaseProps) {
             <div 
               key={disease.id}
               onClick={() => setSelectedDisease(disease)}
-              className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm hover:shadow-md hover:border-slate-300 transition-all duration-300 cursor-pointer flex flex-col group relative overflow-hidden"
+              className="bg-white border border-slate-200 rounded-xl shadow-sm hover:shadow-md hover:border-slate-300 transition-all duration-300 cursor-pointer flex flex-col group relative overflow-hidden"
             >
-              {/* Top border accent based on severity */}
-              <div className={`absolute top-0 left-0 right-0 h-1 ${
-                disease.severity === "Low" ? "bg-emerald-500" :
-                disease.severity === "Medium" ? "bg-amber-500" :
-                disease.severity === "High" ? "bg-orange-500" : "bg-rose-500"
-              }`} />
+              {/* Disease Thumbnail Image */}
+              {disease.image ? (
+                <div className="h-36 w-full overflow-hidden relative bg-slate-100 border-b border-slate-150">
+                  <img 
+                    src={disease.image} 
+                    alt={disease.name}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  />
+                </div>
+              ) : (
+                <div className="h-36 w-full bg-slate-50 flex items-center justify-center text-slate-300 border-b border-slate-150">
+                  <ImageIcon className="w-8 h-8 opacity-40" />
+                </div>
+              )}
 
-              <div className="flex justify-between items-start mb-3">
-                <span className={`text-[10px] font-semibold px-2 py-0.5 rounded uppercase tracking-wider ${getSeverityBadgeColor(disease.severity)}`}>
-                  {disease.severity}
-                </span>
-                <span className="text-[11px] text-slate-400 font-mono flex items-center gap-1">
-                  <Stethoscope className="w-3.5 h-3.5 text-slate-400" />
-                  {disease.specialist}
-                </span>
-              </div>
+              {/* Card content wrapper */}
+              <div className="p-5 flex-1 flex flex-col">
+                <div className="flex justify-between items-start mb-3">
+                  <span className={`text-[10px] font-semibold px-2 py-0.5 rounded uppercase tracking-wider ${getSeverityBadgeColor(disease.severity)}`}>
+                    {disease.severity}
+                  </span>
+                  <span className="text-[11px] text-slate-400 font-mono flex items-center gap-1">
+                    <Stethoscope className="w-3.5 h-3.5 text-slate-400" />
+                    {disease.specialist}
+                  </span>
+                </div>
 
-              <h3 className="font-bold text-slate-900 group-hover:text-blue-600 transition-colors text-base flex items-center justify-between">
-                {disease.name}
-                <ChevronRight className="w-4 h-4 text-slate-400 group-hover:translate-x-1 transition-transform" />
-              </h3>
+                <h3 className="font-bold text-slate-900 group-hover:text-blue-600 transition-colors text-base flex items-center justify-between">
+                  {disease.name}
+                  <ChevronRight className="w-4 h-4 text-slate-400 group-hover:translate-x-1 transition-transform" />
+                </h3>
 
-              <p className="text-slate-500 text-xs leading-relaxed mt-2 line-clamp-3 flex-1">
-                {disease.description}
-              </p>
+                <p className="text-slate-500 text-xs leading-relaxed mt-2 line-clamp-3 flex-1">
+                  {disease.description}
+                </p>
 
-              <div className="mt-4 pt-4 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-400">
-                <span>{disease.symptoms.length} core symptoms</span>
-                <span>{disease.treatment.length} protocols</span>
+                <div className="mt-4 pt-4 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-400">
+                  <span>{disease.symptoms.length} core symptoms</span>
+                  <span>{disease.treatment.length} protocols</span>
+                </div>
               </div>
             </div>
           ))}
@@ -117,29 +128,56 @@ export default function KnowledgeBase({ diseases }: KnowledgeBaseProps) {
         <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl border border-slate-200 relative animate-scale-in">
             {/* Header image/color zone */}
-            <div className={`h-20 px-6 flex items-end relative ${
-              selectedDisease.severity === "Low" ? "bg-gradient-to-r from-emerald-50 to-teal-50" :
-              selectedDisease.severity === "Medium" ? "bg-gradient-to-r from-amber-50 to-orange-50" :
-              selectedDisease.severity === "High" ? "bg-gradient-to-r from-orange-50 to-rose-50" : "bg-gradient-to-r from-rose-50 to-pink-50"
-            }`}>
-              <button
-                onClick={() => setSelectedDisease(null)}
-                className="absolute top-4 right-4 bg-white hover:bg-slate-150 text-slate-500 hover:text-slate-700 p-1.5 rounded-lg shadow-sm transition-all cursor-pointer"
-              >
-                <X className="w-4 h-4" />
-              </button>
-              
-              <div className="mb-[-16px] bg-white px-3 py-1.5 rounded-lg shadow-sm border border-slate-200 flex items-center gap-2">
-                <Activity className={`w-3.5 h-3.5 ${
-                  selectedDisease.severity === "Low" ? "text-emerald-500" :
-                  selectedDisease.severity === "Medium" ? "text-amber-500" :
-                  selectedDisease.severity === "High" ? "text-orange-500" : "text-rose-500"
-                }`} />
-                <span className={`text-[10px] font-bold uppercase tracking-wider ${getSeverityBadgeColor(selectedDisease.severity)}`}>
-                  {selectedDisease.severity} Severity
-                </span>
+            {selectedDisease.image ? (
+              <div className="h-56 w-full overflow-hidden relative">
+                <img 
+                  src={selectedDisease.image} 
+                  alt={selectedDisease.name}
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
+                <button
+                  onClick={() => setSelectedDisease(null)}
+                  className="absolute top-4 right-4 bg-white/80 hover:bg-white text-slate-700 p-1.5 rounded-lg shadow-sm transition-all cursor-pointer z-10"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+                <div className="absolute bottom-4 left-6 bg-white px-3 py-1.5 rounded-lg shadow-sm border border-slate-200 flex items-center gap-2">
+                  <Activity className={`w-3.5 h-3.5 ${
+                    selectedDisease.severity === "Low" ? "text-emerald-500" :
+                    selectedDisease.severity === "Medium" ? "text-amber-500" :
+                    selectedDisease.severity === "High" ? "text-orange-500" : "text-rose-500"
+                  }`} />
+                  <span className={`text-[10px] font-bold uppercase tracking-wider ${getSeverityBadgeColor(selectedDisease.severity)}`}>
+                    {selectedDisease.severity} Severity
+                  </span>
+                </div>
               </div>
-            </div>
+            ) : (
+              <div className={`h-20 px-6 flex items-end relative ${
+                selectedDisease.severity === "Low" ? "bg-gradient-to-r from-emerald-50 to-teal-50" :
+                selectedDisease.severity === "Medium" ? "bg-gradient-to-r from-amber-50 to-orange-50" :
+                selectedDisease.severity === "High" ? "bg-gradient-to-r from-orange-50 to-rose-50" : "bg-gradient-to-r from-rose-50 to-pink-50"
+              }`}>
+                <button
+                  onClick={() => setSelectedDisease(null)}
+                  className="absolute top-4 right-4 bg-white hover:bg-slate-150 text-slate-500 hover:text-slate-700 p-1.5 rounded-lg shadow-sm transition-all cursor-pointer"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+                
+                <div className="mb-[-16px] bg-white px-3 py-1.5 rounded-lg shadow-sm border border-slate-200 flex items-center gap-2">
+                  <Activity className={`w-3.5 h-3.5 ${
+                    selectedDisease.severity === "Low" ? "text-emerald-500" :
+                    selectedDisease.severity === "Medium" ? "text-amber-500" :
+                    selectedDisease.severity === "High" ? "text-orange-500" : "text-rose-500"
+                  }`} />
+                  <span className={`text-[10px] font-bold uppercase tracking-wider ${getSeverityBadgeColor(selectedDisease.severity)}`}>
+                    {selectedDisease.severity} Severity
+                  </span>
+                </div>
+              </div>
+            )}
 
             <div className="p-6 pt-8 space-y-5">
               <div>

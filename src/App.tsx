@@ -35,7 +35,9 @@ import {
   ZoomOut,
   Eye,
   MapPin,
-  X
+  X,
+  Volume2,
+  VolumeX
 } from "lucide-react";
 
 export default function App() {
@@ -231,6 +233,7 @@ export default function App() {
   const [selectedScanIds, setSelectedScanIds] = useState<Record<string, boolean>>({});
   const [scanStatus, setScanStatus] = useState<string>("");
   const [imageQualityError, setImageQualityError] = useState<string | null>(null);
+  const [isSpeaking, setIsSpeaking] = useState<boolean>(false);
 
   // Zoom & Dermatological Lens states
   const [zoomLevel, setZoomLevel] = useState<number>(1);
@@ -504,6 +507,7 @@ export default function App() {
 
       await savePrediction(newPrediction);
       setDiagnosticResult(newPrediction);
+      speakReport(newPrediction);
 
       // Re-fetch history & stats
       loadApplicationData();
@@ -517,7 +521,56 @@ export default function App() {
     }
   }
 
+  // Speech synthesis for reading reports aloud
+  const speakReport = (record: PredictionRecord) => {
+    if (!window.speechSynthesis) return;
+    
+    // Stop any active speech
+    window.speechSynthesis.cancel();
+
+    const diseaseName = record.disease_name;
+    const stage = record.details.severity;
+    const symptoms = record.details.symptoms.join(", ");
+    const precautions = record.details.precautions.join(", ");
+    const specialist = record.details.specialist;
+
+    const textToSpeak = `Dermatological Image Assessment Report. 
+Name of the disease: ${diseaseName}. 
+Severity stage: ${stage}. 
+Common symptoms: ${symptoms}. 
+Precautions: ${precautions}. 
+Whom to contact for cure: ${specialist}.`;
+
+    const utterance = new SpeechSynthesisUtterance(textToSpeak);
+    utterance.onstart = () => setIsSpeaking(true);
+    utterance.onend = () => setIsSpeaking(false);
+    utterance.onerror = () => setIsSpeaking(false);
+    
+    window.speechSynthesis.speak(utterance);
+  };
+
+  const stopSpeaking = () => {
+    if (!window.speechSynthesis) return;
+    window.speechSynthesis.cancel();
+    setIsSpeaking(false);
+  };
+
+  // Stop speaking when user changes tabs or moves away from history item
+  useEffect(() => {
+    stopSpeaking();
+  }, [activeTab, viewHistoryItem]);
+
+  // Cancel any active speech when page unmounts
+  useEffect(() => {
+    return () => {
+      if (window.speechSynthesis) {
+        window.speechSynthesis.cancel();
+      }
+    };
+  }, []);
+
   function clearScanForm() {
+    stopSpeaking();
     setImageFile(null);
     setImagePreview(null);
     setDiagnosticResult(null);
@@ -1098,7 +1151,24 @@ export default function App() {
                             <FileText className="w-5 h-5" />
                           </div>
                           <div>
-                            <h3 className="font-extrabold text-base text-white">Diagnostic Report</h3>
+                            <div className="flex items-center gap-2">
+                              <h3 className="font-extrabold text-base text-white">Diagnostic Report</h3>
+                              <button
+                                onClick={() => isSpeaking ? stopSpeaking() : speakReport(diagnosticResult)}
+                                className={`p-1 rounded-lg transition-all cursor-pointer ${
+                                  isSpeaking 
+                                    ? "bg-rose-500/20 text-rose-400 hover:bg-rose-500/30" 
+                                    : "bg-blue-500/20 text-blue-400 hover:bg-blue-500/30"
+                                }`}
+                                title={isSpeaking ? "Stop Reading Report" : "Read Report Aloud"}
+                              >
+                                {isSpeaking ? (
+                                  <VolumeX className="w-4 h-4 animate-pulse" />
+                                ) : (
+                                  <Volume2 className="w-4 h-4" />
+                                )}
+                              </button>
+                            </div>
                             <p className="text-slate-400 text-xs">Evaluated on {new Date(diagnosticResult.prediction_time).toLocaleDateString()}</p>
                           </div>
                         </div>
@@ -1326,7 +1396,24 @@ export default function App() {
                           <FileText className="w-5 h-5" />
                         </div>
                         <div>
-                          <h3 className="font-extrabold text-base text-white">Clinical Assessment</h3>
+                          <div className="flex items-center gap-2">
+                            <h3 className="font-extrabold text-base text-white">Clinical Assessment</h3>
+                            <button
+                              onClick={() => isSpeaking ? stopSpeaking() : speakReport(viewHistoryItem)}
+                              className={`p-1 rounded-lg transition-all cursor-pointer ${
+                                isSpeaking 
+                                  ? "bg-rose-500/20 text-rose-400 hover:bg-rose-500/30" 
+                                  : "bg-blue-500/20 text-blue-400 hover:bg-blue-500/30"
+                              }`}
+                              title={isSpeaking ? "Stop Reading Assessment" : "Read Assessment Aloud"}
+                            >
+                              {isSpeaking ? (
+                                <VolumeX className="w-4 h-4 animate-pulse" />
+                              ) : (
+                                <Volume2 className="w-4 h-4" />
+                              )}
+                            </button>
+                          </div>
                           <p className="text-slate-400 text-xs">Logged on {new Date(viewHistoryItem.prediction_time).toLocaleString()}</p>
                         </div>
                       </div>

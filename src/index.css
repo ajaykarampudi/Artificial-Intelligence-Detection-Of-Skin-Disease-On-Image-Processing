@@ -9,3 +9,9 @@ html, body, * {
   -ms-overflow-style: none !important;  /* IE and Edge */
   scrollbar-width: none !important;  /* Firefox */
 }
+
+@keyframes dash {
+  to {
+    stroke-dashoffset: 0;
+  }
+}

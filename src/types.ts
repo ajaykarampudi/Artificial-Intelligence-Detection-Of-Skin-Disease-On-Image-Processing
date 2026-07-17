@@ -20,6 +20,7 @@ export interface DiseaseInfo {
   medicines: string[]; // Information Only
   specialist: string;
   emergencySigns?: string[];
+  image?: string; // Optional image URL
 }
 
 export interface PredictionRecord {

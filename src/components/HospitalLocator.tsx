@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { 
   MapPin, 
   Phone, 
@@ -11,11 +11,12 @@ import {
   Activity, 
   AlertTriangle, 
   Search,
-  Sparkles,
   Map as MapIcon,
   Plus
 } from "lucide-react";
 import { APIProvider, Map, AdvancedMarker, Pin } from "@vis.gl/react-google-maps";
+import L from "leaflet";
+import "leaflet/dist/leaflet.css";
 
 // Read the Google Maps Key from the environment
 const API_KEY =
@@ -25,6 +26,33 @@ const API_KEY =
   "";
 
 const hasValidKey = Boolean(API_KEY) && API_KEY !== "YOUR_API_KEY";
+
+// Define custom icons for Leaflet Map
+const getUserDivIcon = () => L.divIcon({
+  html: `<div class="relative flex items-center justify-center w-8 h-8">
+           <span class="absolute inline-flex h-6 w-6 rounded-full bg-blue-500/30 animate-ping"></span>
+           <div class="bg-blue-600 border-2 border-white rounded-full p-1 shadow-md w-5 h-5 flex items-center justify-center">
+             <div class="w-1.5 h-1.5 bg-white rounded-full"></div>
+           </div>
+         </div>`,
+  className: "custom-user-marker",
+  iconSize: [32, 32],
+  iconAnchor: [16, 16]
+});
+
+const getClinicDivIcon = (isSelected: boolean) => L.divIcon({
+  html: `<div class="relative flex items-center justify-center w-8 h-8">
+           <div class="${isSelected ? 'bg-blue-600' : 'bg-amber-600'} border-2 border-white rounded-full p-1.5 shadow-md w-7 h-7 flex items-center justify-center transition-all duration-200">
+             <svg class="w-3.5 h-3.5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+               <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+               <circle cx="12" cy="10" r="3"/>
+             </svg>
+           </div>
+         </div>`,
+  className: "custom-clinic-marker",
+  iconSize: [32, 32],
+  iconAnchor: [16, 16]
+});
 
 interface ClinicalHospital {
   id: string;
@@ -106,6 +134,54 @@ export default function HospitalLocator() {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [mapCenter, setMapCenter] = useState<{ lat: number; lng: number }>({ lat: 37.42, lng: -122.08 });
   const [isSearchingReal, setIsSearchingReal] = useState<boolean>(false);
+  const [routeGeometry, setRouteGeometry] = useState<[number, number][] | null>(null);
+  const [isRouting, setIsRouting] = useState<boolean>(false);
+
+  const mapContainerRef = useRef<HTMLDivElement>(null);
+  const mapRef = useRef<L.Map | null>(null);
+  const markersRef = useRef<L.Marker[]>([]);
+  const userMarkerRef = useRef<L.Marker | null>(null);
+  const routePolylineRef = useRef<L.Polyline | null>(null);
+
+  // Navigate button click handler to request and render directions path
+  const handleNavigateClick = async () => {
+    if (hasValidKey && selectedClinic) {
+      const url = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(selectedClinic.name + " " + selectedClinic.address)}`;
+      window.open(url, "_blank", "noopener,noreferrer");
+      return;
+    }
+
+    if (!coordinates) {
+      alert("Please enable device location at the top to calculate a route from your current position.");
+      return;
+    }
+    if (!selectedClinic) return;
+
+    setIsRouting(true);
+    try {
+      const start = coordinates;
+      const end = selectedClinic;
+      const response = await fetch(
+        `https://router.project-osrm.org/route/v1/driving/${start.lng},${start.lat};${end.lng},${end.lat}?overview=full&geometries=geojson`
+      );
+      if (!response.ok) {
+        throw new Error("Routing service error");
+      }
+      const data = await response.json();
+      if (data.routes && data.routes.length > 0) {
+        const geojson = data.routes[0].geometry;
+        const leafletCoords = geojson.coordinates.map((coord: [number, number]) => [coord[1], coord[0]] as [number, number]);
+        setRouteGeometry(leafletCoords);
+      } else {
+        setRouteGeometry([[start.lat, start.lng], [end.lat, end.lng]]);
+      }
+    } catch (err) {
+      console.error("OSRM Route fetching failed, falling back to direct line:", err);
+      setRouteGeometry([[coordinates.lat, coordinates.lng], [selectedClinic.lat, selectedClinic.lng]]);
+    } finally {
+      setIsRouting(false);
+    }
+  };
 
   // Ask for location permission and center the map/data
   const handleLocateMe = () => {
@@ -180,6 +256,107 @@ export default function HospitalLocator() {
       clinic.address.toLowerCase().includes(q)
     );
   });
+
+  // Initialize Leaflet map
+  useEffect(() => {
+    if (hasValidKey || !mapContainerRef.current) return;
+
+    if (!mapRef.current) {
+      mapRef.current = L.map(mapContainerRef.current, {
+        center: [mapCenter.lat, mapCenter.lng],
+        zoom: 13,
+        zoomControl: true,
+        attributionControl: false
+      });
+
+      L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+        maxZoom: 19,
+      }).addTo(mapRef.current);
+    }
+
+    return () => {
+      if (mapRef.current) {
+        mapRef.current.remove();
+        mapRef.current = null;
+      }
+    };
+  }, [hasValidKey]);
+
+  // Update map view when mapCenter changes
+  useEffect(() => {
+    if (hasValidKey) return;
+    if (mapRef.current) {
+      mapRef.current.setView([mapCenter.lat, mapCenter.lng], mapRef.current.getZoom());
+    }
+  }, [mapCenter, hasValidKey]);
+
+  // Update Leaflet markers
+  useEffect(() => {
+    if (hasValidKey) return;
+    const map = mapRef.current;
+    if (!map) return;
+
+    // Clear existing markers
+    markersRef.current.forEach(marker => marker.remove());
+    markersRef.current = [];
+
+    if (userMarkerRef.current) {
+      userMarkerRef.current.remove();
+      userMarkerRef.current = null;
+    }
+
+    // Add User location marker
+    if (coordinates) {
+      const userMarker = L.marker([coordinates.lat, coordinates.lng], { icon: getUserDivIcon() })
+        .addTo(map)
+        .bindPopup("Your Location");
+      userMarkerRef.current = userMarker;
+    }
+
+    // Add Clinic markers
+    filteredClinics.forEach(clinic => {
+      const isSelected = selectedClinic?.id === clinic.id;
+      const marker = L.marker([clinic.lat, clinic.lng], { icon: getClinicDivIcon(isSelected) })
+        .addTo(map)
+        .bindPopup(`<b>${clinic.name}</b><br/>${clinic.specialty}`);
+      
+      marker.on('click', () => {
+        setSelectedClinic(clinic);
+        setMapCenter({ lat: clinic.lat, lng: clinic.lng });
+      });
+
+      markersRef.current.push(marker);
+    });
+  }, [filteredClinics, coordinates, selectedClinic, hasValidKey]);
+
+  // Reset route when selected clinic changes
+  useEffect(() => {
+    setRouteGeometry(null);
+  }, [selectedClinic]);
+
+  // Draw/update route polyline on Leaflet Map
+  useEffect(() => {
+    if (hasValidKey) return;
+    const map = mapRef.current;
+    if (!map) return;
+
+    if (routePolylineRef.current) {
+      routePolylineRef.current.remove();
+      routePolylineRef.current = null;
+    }
+
+    if (routeGeometry && routeGeometry.length > 0) {
+      const polyline = L.polyline(routeGeometry, {
+        color: "#2563eb",
+        weight: 5,
+        opacity: 0.85,
+        lineJoin: "round"
+      }).addTo(map);
+
+      routePolylineRef.current = polyline;
+      map.fitBounds(polyline.getBounds(), { padding: [50, 50] });
+    }
+  }, [routeGeometry, hasValidKey]);
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -359,45 +536,8 @@ export default function HospitalLocator() {
                 </Map>
               </APIProvider>
             ) : (
-              /* Fallback visual map view showing mockup with clinical styling */
-              <div className="absolute inset-0 bg-slate-950 flex flex-col justify-between p-6 relative overflow-hidden">
-                {/* Visual Grid Lines and Dots mimicking map layers */}
-                <div className="absolute inset-0 opacity-10 pointer-events-none" style={{
-                  backgroundImage: `radial-gradient(#FFF 1px, transparent 1px), linear-gradient(0deg, rgba(255,255,255,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px)`,
-                  backgroundSize: "20px 20px"
-                }}></div>
-
-                <div className="z-10 bg-slate-900/90 backdrop-blur-xs border border-slate-800 rounded-lg p-3.5 max-w-sm">
-                  <span className="text-[9px] text-blue-400 font-extrabold tracking-widest uppercase block mb-1">Interactive Diagnostic Mapping</span>
-                  <p className="text-[11px] text-slate-300 leading-relaxed">
-                    A real Google Map is fully coded and ready. Add your <strong>GOOGLE_MAPS_PLATFORM_KEY</strong> in the Secrets menu to overlay satellite details, directions, and live nearby searching.
-                  </p>
-                </div>
-
-                {/* Simulated markers layer */}
-                <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
-                  <div className="relative w-full h-full">
-                    {/* Mock user center */}
-                    <div className="absolute top-[40%] left-[50%] bg-blue-500 border-2 border-white rounded-full w-4 h-4 shadow-lg animate-pulse"></div>
-                    {/* Mock clinics */}
-                    <div className="absolute top-[25%] left-[30%] bg-amber-500 border border-white rounded-full w-3.5 h-3.5 shadow-md animate-bounce"></div>
-                    <div className="absolute top-[65%] left-[70%] bg-amber-500 border border-white rounded-full w-3.5 h-3.5 shadow-md"></div>
-                    <div className="absolute top-[18%] left-[75%] bg-amber-500 border border-white rounded-full w-3.5 h-3.5 shadow-md"></div>
-                  </div>
-                </div>
-
-                <div className="z-10 flex justify-between items-center bg-slate-900/90 backdrop-blur-xs border-t border-slate-800 p-2.5 rounded-lg">
-                  <span className="text-[10px] text-slate-400 font-semibold font-mono">Offline Directory Render Active</span>
-                  <a 
-                    href="https://console.cloud.google.com/google/maps-apis/start?utm_campaign=gmp-code-assist-ais" 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="text-[10px] text-blue-400 font-bold hover:underline flex items-center gap-1"
-                  >
-                    Obtain Maps Key <ExternalLink className="w-3 h-3" />
-                  </a>
-                </div>
-              </div>
+              /* Live Leaflet Map view as a fallback when no Google Maps key is present */
+              <div ref={mapContainerRef} className="absolute inset-0 w-full h-full z-0 text-slate-800" />
             )}
           </div>
 
@@ -455,14 +595,13 @@ export default function HospitalLocator() {
                 </div>
 
                 <div className="flex gap-2">
-                  <a
-                    href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(selectedClinic.name + " " + selectedClinic.address)}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-lg shadow-xs flex items-center gap-1.5 transition-all cursor-pointer"
+                  <button
+                    onClick={handleNavigateClick}
+                    disabled={isRouting}
+                    className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs rounded-lg shadow-xs flex items-center gap-1.5 transition-all cursor-pointer disabled:opacity-50"
                   >
-                    <Navigation className="w-3.5 h-3.5" /> Navigate
-                  </a>
+                    <Navigation className="w-3.5 h-3.5" /> {isRouting ? "Calculating Route..." : "Navigate"}
+                  </button>
                 </div>
               </div>
             </div>
